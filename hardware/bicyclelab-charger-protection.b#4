@@ -121,10 +121,10 @@
 <wire x1="63.805" y1="6.34" x2="0" y2="6.34" width="0" layer="20"/>
 <wire x1="0" y1="6.34" x2="0" y2="0" width="0" layer="20"/>
 <text x="30.7975" y="-10.4775" size="1.778" layer="27">O.Evalet</text>
-<text x="1.905" y="2.8575" size="0.762" layer="21" rot="R90">CELL-</text>
+<text x="1.905" y="2.54" size="0.762" layer="21">CELL-</text>
 <text x="12.065" y="2.54" size="0.7" layer="21" rot="R180">C+</text>
 <text x="38.4175" y="1.905" size="0.762" layer="22" rot="MR180">O.Evalet - USB Led driver - 0.1</text>
-<text x="57.15" y="3.175" size="0.762" layer="21" rot="R90"> CELL+</text>
+<text x="56.8325" y="2.54" size="0.762" layer="21"> CELL+</text>
 <text x="14.605" y="2.54" size="0.7" layer="21" rot="R180">CB</text>
 <text x="9.2075" y="2.54" size="0.7" layer="21" rot="R180">C-</text>
 </plain>
@@ -169,6 +169,9 @@
 <rectangle x1="4.826" y1="-0.254" x2="5.334" y2="0.254" layer="51"/>
 <rectangle x1="2.286" y1="-0.254" x2="2.794" y2="0.254" layer="51"/>
 <rectangle x1="-0.254" y1="-0.254" x2="0.254" y2="0.254" layer="51"/>
+</package>
+<package name="PAD-1.5X4.5">
+<smd name="P$1" x="0" y="0" dx="1.5" dy="2" layer="1"/>
 </package>
 </packages>
 </library>
@@ -318,13 +321,6 @@
 <smd name="P$1" x="0" y="0" dx="1.2" dy="1.2" layer="1"/>
 <smd name="P$2" x="2.1" y="0" dx="1.2" dy="1.2" layer="1"/>
 <text x="0" y="1.524" size="0.6096" layer="21" font="vector">&gt;NAME</text>
-</package>
-</packages>
-</library>
-<library name="bicyclelab">
-<packages>
-<package name="PAD-SMD">
-<smd name="P$1" x="0" y="0" dx="1.4224" dy="0.7112" layer="1"/>
 </package>
 </packages>
 </library>
@@ -495,8 +491,12 @@ design rules under a new name.</description>
 <element name="R79" library="rcl" package="R0805" value="180" x="30.48" y="4.445" rot="R180"/>
 <element name="C21" library="rcl" package="C0402" value="100n" x="19.3675" y="1.5875" rot="R180"/>
 <element name="JP2" library="0-SparkFun" package="1X03" value="" x="8.89" y="4.445"/>
-<element name="JP3" library="bicyclelab" package="PAD-SMD" value="M01SMD-TINY" x="56.8325" y="2.2225" rot="R90"/>
-<element name="JP4" library="bicyclelab" package="PAD-SMD" value="M01SMD-TINY" x="1.5875" y="1.5875" rot="R90"/>
+<element name="JP3" library="0-SparkFun" package="PAD-1.5X4.5" value="" x="56.8325" y="1.5875" rot="R90"/>
+<element name="JP4" library="0-SparkFun" package="PAD-1.5X4.5" value="" x="1.905" y="1.5875" rot="R90"/>
+<element name="JP1" library="0-SparkFun" package="PAD-1.5X4.5" value="" x="59.3725" y="1.5875" rot="R90"/>
+<element name="JP5" library="0-SparkFun" package="PAD-1.5X4.5" value="" x="61.9125" y="1.5875" rot="R90"/>
+<element name="JP6" library="0-SparkFun" package="PAD-1.5X4.5" value="" x="4.445" y="1.5875" rot="R90"/>
+<element name="JP7" library="0-SparkFun" package="PAD-1.5X4.5" value="" x="6.985" y="1.5875" rot="R90"/>
 </elements>
 <signals>
 <signal name="N$81">
@@ -529,6 +529,12 @@ design rules under a new name.</description>
 <vertex x="0" y="0"/>
 </polygon>
 <contactref element="JP4" pad="P$1"/>
+<contactref element="JP7" pad="P$1"/>
+<contactref element="JP6" pad="P$1"/>
+<wire x1="29.53" y1="4.445" x2="52.33" y2="3.4925" width="0" layer="19" extent="1-1"/>
+<wire x1="6.985" y1="1.5875" x2="29.53" y2="4.445" width="0" layer="19" extent="1-1"/>
+<wire x1="4.445" y1="1.5875" x2="6.985" y2="1.5875" width="0" layer="19" extent="1-1"/>
+<wire x1="1.905" y1="1.5875" x2="4.445" y2="1.5875" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="BALANCING">
 <contactref element="R76" pad="2"/>
@@ -559,8 +565,12 @@ design rules under a new name.</description>
 <wire x1="25.3975" y1="1.5875" x2="23.8275" y2="1.5875" width="0.6096" layer="1"/>
 <wire x1="25.7175" y1="1.9075" x2="26.6725" y2="0.9525" width="0.6096" layer="1"/>
 <wire x1="26.6725" y1="0.9525" x2="54.9275" y2="0.9525" width="0.6096" layer="1"/>
-<wire x1="54.9275" y1="0.9525" x2="56.1975" y2="2.2225" width="0.6096" layer="1"/>
-<wire x1="56.1975" y1="2.2225" x2="56.8325" y2="2.2225" width="0.6096" layer="1"/>
+<wire x1="54.9275" y1="0.9525" x2="56.1975" y2="1.5875" width="0.6096" layer="1"/>
+<wire x1="56.1975" y1="1.5875" x2="56.8325" y2="1.5875" width="0.6096" layer="1"/>
+<contactref element="JP1" pad="P$1"/>
+<contactref element="JP5" pad="P$1"/>
+<wire x1="59.3725" y1="1.5875" x2="61.9125" y2="1.5875" width="0" layer="19" extent="1-1"/>
+<wire x1="56.8325" y1="1.5875" x2="59.3725" y2="1.5875" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$14">
 <contactref element="R77" pad="2"/>

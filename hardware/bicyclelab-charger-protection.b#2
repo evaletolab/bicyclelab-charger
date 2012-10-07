@@ -573,7 +573,7 @@ design rules under a new name.</description>
 <contactref element="R78" pad="1"/>
 <wire x1="43.7575" y1="3.4925" x2="46.73" y2="3.4925" width="1.016" layer="1"/>
 </signal>
-<signal name="CELL_FILTER-">
+<signal name="STACK_FILTER+">
 <contactref element="PD12" pad="P$2"/>
 <contactref element="C21" pad="2"/>
 <contactref element="JP2" pad="1"/>
