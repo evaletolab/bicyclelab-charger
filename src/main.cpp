@@ -8,11 +8,16 @@
  *  
  */
 
-
-#include <WProgram.h>
+#ifdef ARDUINO
+# include <Arduino.h>
+#else
+# include <WProgram.h>
+#endif
 #include "config.h"
 #include "energy.h"
+#ifdef TINY
 #include <core_timers.h>
+#endif
 #include <PID_v1.h>
 
 #ifdef CONFIG_WITH_EEPROM
@@ -40,7 +45,7 @@ double fb,pwm ;
 double ref_v=V_REF*1023.0/VCC_REF, fb_v,  vfb;
 
 //Specify values for current. Current is normalized with V_REF
-double  fb_i,  ifb, norm_i=V_REF/I_MAX;
+double  fb_i,  ifb, norm_i=I_NORM;
 
 PID pid_vfb(&fb, &pwm, &ref_v, aKp, aKi, aKd, DIRECT);
 
@@ -54,12 +59,28 @@ void setup()   {
   pinMode(A_IFB, INPUT);
   digitalWrite(A_IFB, HIGH);
 
+  //pulldown pwm
+  pinMode(P_PWM, OUTPUT);
+  digitalWrite(P_PWM, LOW);
+  
+  //
+  // charger is on
+  pinMode(P_SW, OUTPUT);
+  digitalWrite(P_SW, LOW);
 
+#ifdef TINY
   //
   // setup timer to the maximum speed at 52Khz  
   OSCCAL = 0xFF;  
   Timer1_SetWaveformGenerationMode(Timer1_Fast_PWM_FF);
   Timer1_ClockSelect(Timer1_Prescale_Value_1);
+#else 
+  // Set pin 6's PWM frequency to 62500 Hz (62500/1 = 62500)
+  // Note that the base frequency for pins 5 and 6 is 62500 Hz  
+  // *   - Changes on pins 3, 5, 6, or 11 may cause the delay() and
+  // *     millis() functions to stop working. Other timing-related
+  TCCR0B = TCCR0B & 0b11111000 | 0x01;
+#endif
    
   analogWrite(P_PWM, 0);  
   
@@ -67,17 +88,15 @@ void setup()   {
   
   //
   //recompute PID every 6ms
-  pid_vfb.SetSampleTime(8);
+  pid_vfb.SetSampleTime(6);
   //
   // set maximum duty cycle (55%)
   pid_vfb.SetOutputLimits(1,140);
 
 
 #ifdef CONFIG_WITH_PRINT
-  Serial.begin(38400);
+  Serial.begin(115200);
 	Serial.println("Booting ");
-	Serial.print("CPU: ");
-	Serial.println(OSCCAL);
 #endif
 
 }
@@ -99,14 +118,18 @@ void loop(){
   energy_debug_off();
 #endif  
   float p_fb=0, p_pwm=0, p_vfb=0, p_ifb=0;
-  int odd=false, checking=true;
+  int odd=false, checking=true, charging=true;
   
   //
   // checking battery before starting the charge 
+  analogWrite(P_PWM, 1);  
+  delay(TIMER_TICK);
+  
   while(checking){
     //
     // switch on charger
-    //digitalWrite(P_CHARGE,HIGH);  
+    digitalWrite(P_SW, HIGH);
+    delay(TIMER_TICK);
     
     //
     // checking shortcut or unpluged
@@ -114,33 +137,56 @@ void loop(){
     ifb=(VCC_REF/1023.0)*fb_i;
     if (ifb>O_I){
       //on current to high, switchoff charger
+#ifdef CONFIG_WITH_PRINT      
+      Serial.print("OVER I: ");Serial.println(ifb,2);
+#endif      
 
-      //digitalWrite(P_CHARGE,LOW);  
-      delay(1000);
+      digitalWrite(P_SW,LOW);  
+      analogWrite(P_PWM, 0);  
+      delay(TIMER_WAIT);
       continue;
     }
 
     //
     // checking unpluged
-    analogWrite(P_PWM, 10);  
+    analogWrite(P_PWM, 3);  
+    delay(TIMER_TICK);
     fb_v=analogRead(A_VFB);
     vfb=(VCC_REF/1023.0)*fb_v;
     if (vfb>O_V){
       // on volt to high switchoff charger
-      //digitalWrite(P_CHARGE,LOW);  
-      delay(1000);
+#ifdef CONFIG_WITH_PRINT      
+      Serial.print("OVER V: ");Serial.println(vfb,2);
+#endif      
+      digitalWrite(P_SW,LOW);  
+      analogWrite(P_PWM, 0);  
+      delay(TIMER_WAIT);
+      continue;
+    }
+    if (vfb<=1.0){
+#ifdef CONFIG_WITH_PRINT      
+      Serial.print("STANDBY ");Serial.println(vfb,2);
+#endif      
+      analogWrite(P_PWM, 1);  
+      delay(TIMER_WAIT);
       continue;
     }
     checking=false;
   }     
   
+#ifdef CONFIG_WITH_PRINT      
+    Serial.println("START CHARGING: ");
+#endif      
+
 
   //
   // main loop, charging
-  while(true){
+  while(charging){
   
+    // starting charging
     digitalWrite(0,odd);odd=!odd;
-  
+    digitalWrite(P_SW, HIGH);
+    
     //
     // read voltage feedback
     fb_v=analogRead(A_VFB);
@@ -148,13 +194,15 @@ void loop(){
 
     //
     // security trigger on over voltage
-    if (vfb>O_V && 0){
-      pwm=0.0;
-#if CONFIG_WITH_PRINT      
-      Serial.print("OVER V: ");Serial.println(vfb,2);
+    if (vfb>O_V){
+#ifdef CONFIG_WITH_PRINT      
+      Serial.print("OVER V: ");Serial.print(vfb,2);
+      Serial.print(" I: ");Serial.println(ifb,2);
 #endif      
-      analogWrite(P_PWM, 0 );
-      //delay(1000);
+      pwm=1;
+      analogWrite(P_PWM, (int)(pwm) ); 
+      digitalWrite(P_SW, LOW);
+      delay(TIMER_WAIT);
       continue;      
     }
 
@@ -165,20 +213,27 @@ void loop(){
     
     //
     // security trigger on over current
-    if (ifb>O_I && 0){
-#if CONFIG_WITH_PRINT      
-      Serial.print("OVER I: ");Serial.println(ifb,2);
+    if (ifb>O_I){
+#ifdef CONFIG_WITH_PRINT      
+      Serial.print("OVER I: ");Serial.print(ifb,2);
+      Serial.print(" V: ");Serial.println(vfb,2);
 #endif      
-      pwm=0.0;
-      analogWrite(P_PWM, 0 );
-      //delay(1000);
+      pwm=1;
+      analogWrite(P_PWM, (int)(pwm) ); 
+      digitalWrite(P_SW, LOW);
+      delay(TIMER_WAIT);
       continue;      
     }
     
     //
-    // limit on voltage or current
+    // check if cherging is done
+    //if (vfb>=42.0 && ifb<=){
+    //}
+    
+    //
+    // limit on voltage or current (or power UxI)
     fb=max((fb_i*norm_i),fb_v);
-    fb=fb_v;
+    //fb=fb_v;
     
     
     pid_vfb.Compute();

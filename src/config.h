@@ -33,16 +33,28 @@
 #endif
 
 
-//
-// battery managment
-#define V_MIN 2.6
-#define V_MAX 4.25
-#define V_TOP 4.20
+// V_REF factor =/11.0, 
+// --> 42.0/11.0=3.818, 
+// --> 45.0/11.0=4.09, 
+#define         V_REF 3.818
+#define         O_V 4.09
 
-// power
-#define P_GND  7
-#define P_VCC  8
-#define SET_PRESCALER 0
+// I_MAX factor =/2.0, 
+//
+#define         I_MAX 1.0
+#define         O_I 2.0
+#define         I_NORM V_REF/I_MAX
+
+// P_MAX
+#define         P_MAX 45.0
+
+
+#define         VCC_REF 5.0
+#define         PRINT_TICK 200
+#define         TIMER_TICK 100
+#define         TIMER_WAIT 100000/3
+#define         PRINT 1
+
 #define TEMPERATURE_CALIBRATE 294
 
 #if defined( __AVR_ATtinyX4__ )
@@ -60,25 +72,9 @@
 //  PWM        (D  4)  PA6  7|    |8   PA5  (D  5)        PWM (Serial3)
 //                           +----+
 
-# define P_DEBUG  10
 
-
-// Set pin 6's PWM frequency to 62500 Hz (62500/1 = 62500)
-// Note that the base frequency for pins 5 and 6 is 62500 Hz  
-// *   - Changes on pins 3, 5, 6, or 11 may cause the delay() and
-// *     millis() functions to stop working. Other timing-related
 #define         P_PWM 5
-
-//
-// V_REF as master, I_MAX is normalized 
-#define         VCC_REF 4.98
-#define         V_REF 2.0
-#define         I_MAX 2.0
-#define         O_V 5.2
-#define         O_I 3.0
-#define         PRINT_TICK 200
-#define         PRINT 1
-
+#define         P_SW 6
 #define         A_VFB 1
 #define         A_IFB 2
 
@@ -101,9 +97,6 @@
 //                     GND  4|    |5   PB0  (D  0)        pwm0 MOSI
 //                           +----+
 
-# define P_DEBUG  3
-# define P_SOUT 1
-# define P_SIN  2
 
 // 0x0F => TEMP sensor, 0x80 1.1V reference
 # define A_TEMP 0x8F
@@ -112,7 +105,21 @@
 //VCC as voltage reference
 # define ADC_VREF 0b00000000
 
+#else
+//
+// ARDUINO 
+
+// Set pin 6's PWM frequency to 62500 Hz (62500/1 = 62500)
+// Note that the base frequency for pins 5 and 6 is 62500 Hz  
+// *   - Changes on pins 3, 5, 6, or 11 may cause the delay() and
+// *     millis() functions to stop working. Other timing-related
+#define         P_PWM 6
+#define         P_SW 7
+#define         A_VFB 0
+#define         A_IFB 1
+
 #endif
+
 
 
 #endif

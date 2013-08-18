@@ -1,4 +1,8 @@
-#include "WProgram.h"
+#ifdef ARDUINO
+# include <Arduino.h>
+#else
+# include <WProgram.h>
+#endif
 #include "config.h"
 #include "wiring_private.h"
 #include "pins_arduino.h"
@@ -104,15 +108,23 @@ void energy_save_off(){
 	power_timer0_enable();
 	power_timer1_enable();
 //	power_twi_enable();
-//	power_spi_enable();
+#if PRSPI  
+	power_spi_enable();
+#endif	
   power_adc_enable();
+#if PRUSI  
   power_usi_enable();
+#endif  
 }
 
 void energy_save_on(){
   power_adc_disable();
+#if PRUSI  
   power_usi_disable();
-//	power_spi_disable();
+#endif  
+#if PRSPI  
+	power_spi_disable();
+#endif	
 //	power_twi_disable();
 	power_timer0_disable();
 	power_timer1_disable();
@@ -124,7 +136,9 @@ void __enable(){
 //	power_twi_enable();
 //	power_spi_enable();
   power_adc_enable();
+#if PRUSI  
   power_usi_enable();
+#endif  
 }
 
 void __disable(){
@@ -217,13 +231,17 @@ void energy_init(){
 }
 
 void energy_debug_on(){
+#ifdef P_DEBUG
   pinMode(P_DEBUG, OUTPUT);       
   digitalWrite(P_DEBUG, LOW);
+#endif  
 }
 
 void energy_debug_off(){
+#ifdef P_DEBUG
   pinMode(P_DEBUG, INPUT);       
   digitalWrite(P_DEBUG, HIGH);
+#endif  
 }
 
 
@@ -233,7 +251,8 @@ void energy_debug_off(){
  */
 
 uint16_t _avr_temp(){
-    uint16_t res;
+    uint16_t res=0;
+#ifdef A_TEMP    
 		ADMUX = A_TEMP;			//attinyX4: B100010=> TEMP sensor, 
 
     delay(1); 
@@ -246,6 +265,7 @@ uint16_t _avr_temp(){
     res = ADC;
     ADCSRA &= ~(_BV(ADIE));
     ADCSRA &= ~(_BV(ADIF));
+#endif    
     return res;
 }
 
@@ -263,7 +283,7 @@ float avr_internal_temp(){
 
 
 double avr_internal_vcc() {
-#if 1
+#if MUX_VREF
 	// read vcc
 	// http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&t=80458&start=0&postdays=0&postorder=asc&highlight=adc+bandgap+vcc
   long result;
