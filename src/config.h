@@ -32,28 +32,12 @@
 #	define CONFIG_WITH_EEPROM
 #endif
 
-
-// V_REF factor =/11.0, 
-// --> 42.0/11.0=3.818, 
-// --> 45.0/11.0=4.09, 
-#define         V_REF 3.818
-#define         O_V 4.09
-
-// I_MAX factor =/2.0, 
-//
-#define         I_MAX 1.0
-#define         O_I 2.0
-#define         I_NORM V_REF/I_MAX
-
-// P_MAX
-#define         P_MAX 45.0
-
-
-#define         VCC_REF 5.0
 #define         PRINT_TICK 200
-#define         TIMER_TICK 100
-#define         TIMER_WAIT 100000/3
+#define         TIMER_TICK 10
+#define         TIMER_WAIT 100000/2
 #define         PRINT 1
+
+#define  V2B(V)  (V*1023.0/VCC_REF)
 
 #define TEMPERATURE_CALIBRATE 294
 
@@ -75,6 +59,7 @@
 
 #define         P_PWM 5
 #define         P_SW 6
+#define         P_VCC5 7
 #define         A_VFB 1
 #define         A_IFB 2
 
@@ -113,8 +98,9 @@
 // Note that the base frequency for pins 5 and 6 is 62500 Hz  
 // *   - Changes on pins 3, 5, 6, or 11 may cause the delay() and
 // *     millis() functions to stop working. Other timing-related
-#define         P_PWM 6
-#define         P_SW 7
+#define         P_PWM 5
+#define         P_SW 2
+#define         P_VCC5 8
 #define         A_VFB 0
 #define         A_IFB 1
 

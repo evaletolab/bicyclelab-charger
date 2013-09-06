@@ -271,12 +271,12 @@ uint16_t _avr_temp(){
 
 
 float avr_internal_temp(){
-	long t=0;
-	for(short i=0;i<10;i++)
-		t+=_avr_temp();
+	double t=(double)_avr_temp();
+	for(short i=0;i<2;i++)
+		t=t*.5+_avr_temp()*.5;
 	
 //	return (_VREF/1024.0)*(t)/10.00;
-	return ((t)/10.0)-TEMPERATURE_CALIBRATE;
+	return (t)-TEMPERATURE_CALIBRATE;
 }
 
 

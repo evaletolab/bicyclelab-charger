@@ -15,10 +15,10 @@
 #endif
 #include "config.h"
 #include "energy.h"
+#include "charger.h"
 #ifdef TINY
 #include <core_timers.h>
 #endif
-#include <PID_v1.h>
 
 #ifdef CONFIG_WITH_EEPROM
 //#include <EEPROM.h>
@@ -30,24 +30,8 @@
 extern "C" void __cxa_pure_virtual() {  }
 #endif
 
+static CHARGER charger;
 
-//Define the aggressive and conservative Tuning Parameters
-// http://fr.wikipedia.org/wiki/M%C3%A9thode_de_Ziegler-Nichols
-// Ku = 2.1, Tu = 50Hz, 0.02s, 
-// Kp =  Ku/2.2 =.96  , Ki = (1.2 * Kp) / Pu = .023, Kd=0
-//double aKp=0.96, aKi=0.01, aKd=0.0001;
-double aKp=1.8, aKi=0.03, aKd=0.0064;
-
-
-//Specify common PID values
-double fb,pwm ;
-//Specify PID values for Voltage
-double ref_v=V_REF*1023.0/VCC_REF, fb_v,  vfb;
-
-//Specify values for current. Current is normalized with V_REF
-double  fb_i,  ifb, norm_i=I_NORM;
-
-PID pid_vfb(&fb, &pwm, &ref_v, aKp, aKi, aKd, DIRECT);
 
 void setup()   {                
 
@@ -61,7 +45,11 @@ void setup()   {
 
   //pulldown pwm
   pinMode(P_PWM, OUTPUT);
-  digitalWrite(P_PWM, LOW);
+  analogWrite(P_PWM,0);  
+  
+  
+  pinMode(P_VCC5, INPUT);
+  digitalWrite(P_VCC5, HIGH);
   
   //
   // charger is on
@@ -75,24 +63,19 @@ void setup()   {
   Timer1_SetWaveformGenerationMode(Timer1_Fast_PWM_FF);
   Timer1_ClockSelect(Timer1_Prescale_Value_1);
 #else 
+  // http://arduino.cc/en/Tutorial/SecretsOfArduinoPWM
   // Set pin 6's PWM frequency to 62500 Hz (62500/1 = 62500)
   // Note that the base frequency for pins 5 and 6 is 62500 Hz  
   // *   - Changes on pins 3, 5, 6, or 11 may cause the delay() and
   // *     millis() functions to stop working. Other timing-related
+  // *   - Pins 5 and 6 are paired on timer0
+  // *   - Pins 9 and 10 are paired on timer1
+  // *   - Pins 3 and 11 are paired on timer2
   TCCR0B = TCCR0B & 0b11111000 | 0x01;
 #endif
    
-  analogWrite(P_PWM, 0);  
   
-  pid_vfb.SetMode(AUTOMATIC);
-  
-  //
-  //recompute PID every 6ms
-  pid_vfb.SetSampleTime(6);
-  //
-  // set maximum duty cycle (55%)
-  pid_vfb.SetOutputLimits(1,140);
-
+  charger_init(charger);
 
 #ifdef CONFIG_WITH_PRINT
   Serial.begin(115200);
@@ -100,148 +83,59 @@ void setup()   {
 #endif
 
 }
- 
-
 
 void loop(){		   
-	//
-	// check if battery is ok
-#ifdef CONFIG_WITH_PRINT
-	float vcc=avr_internal_vcc();
-	float vtemp=avr_internal_temp();
-  energy_debug_on();
-	Serial.print(" - Temp. sens: ");
-	Serial.println(vtemp,2);
-	Serial.print(" - Volt. sens: ");
-	Serial.println(vcc,2);
-  Serial.println("DEBUG MODE! -- add power +24.3mA");
-  energy_debug_off();
-#endif  
-  float p_fb=0, p_pwm=0, p_vfb=0, p_ifb=0;
-  int odd=false, checking=true, charging=true;
+  //
+  //
+  // checking when output is switched off
+  // detect internal issue like undervoltage, over current, over temperature 
+  // or unplugged input (for debug only)
+  if(!charger_openvoltage(charger)) 
+    return;
+
+  // Checking battery
+  // ================
+  // 1)The charger check if a battery is plugged, we assume that battery capacity 
+  //   and voltage are hardcoded ( SmartBattery feature is not yet implemented)
+  // 2)The charger then checks for over/under battery temperature and over voltage 
+  //   and flags an error if any of these are detected, 
+  //   -> sending a short error message to the PC.   
+  //
+  // ----
+  // http://batteryuniversity.com/learn/article/charging_lithium_ion_batteries
+  // Do not recharge lithium-ion if a cell has stayed at or below 1.5V for more 
+  // than a week. Copper shunts may have formed inside the cells that can lead 
+  // to a partial or total electrical short. If recharged, the cells might become 
+  // unstable, causing excessive heat or showing other anomalies. Li-ion packs 
+  // that have been under stress are more sensitive to mechanical abuse, such 
+  // as vibration, dropping and exposure to heat.
+  if(!charger_checking(charger)) 
+    return;
   
   //
-  // checking battery before starting the charge 
-  analogWrite(P_PWM, 1);  
-  delay(TIMER_TICK);
-  
-  while(checking){
-    //
-    // switch on charger
-    digitalWrite(P_SW, HIGH);
-    delay(TIMER_TICK);
-    
-    //
-    // checking shortcut or unpluged
-    fb_i=analogRead(A_IFB);
-    ifb=(VCC_REF/1023.0)*fb_i;
-    if (ifb>O_I){
-      //on current to high, switchoff charger
-#ifdef CONFIG_WITH_PRINT      
-      Serial.print("OVER I: ");Serial.println(ifb,2);
-#endif      
-
-      digitalWrite(P_SW,LOW);  
-      analogWrite(P_PWM, 0);  
-      delay(TIMER_WAIT);
-      continue;
-    }
-
-    //
-    // checking unpluged
-    analogWrite(P_PWM, 3);  
-    delay(TIMER_TICK);
-    fb_v=analogRead(A_VFB);
-    vfb=(VCC_REF/1023.0)*fb_v;
-    if (vfb>O_V){
-      // on volt to high switchoff charger
-#ifdef CONFIG_WITH_PRINT      
-      Serial.print("OVER V: ");Serial.println(vfb,2);
-#endif      
-      digitalWrite(P_SW,LOW);  
-      analogWrite(P_PWM, 0);  
-      delay(TIMER_WAIT);
-      continue;
-    }
-    if (vfb<=1.0){
-#ifdef CONFIG_WITH_PRINT      
-      Serial.print("STANDBY ");Serial.println(vfb,2);
-#endif      
-      analogWrite(P_PWM, 1);  
-      delay(TIMER_WAIT);
-      continue;
-    }
-    checking=false;
-  }     
-  
-#ifdef CONFIG_WITH_PRINT      
-    Serial.println("START CHARGING: ");
-#endif      
-
-
+  // main loop, charging (never exit function!)
+  // ==========================================
+  // During all loop (fast & constant charge) the charger check 
+  // the temperature and if battery is hot unplugged
   //
-  // main loop, charging
-  while(charging){
-  
-    // starting charging
-    digitalWrite(0,odd);odd=!odd;
-    digitalWrite(P_SW, HIGH);
-    
-    //
-    // read voltage feedback
-    fb_v=analogRead(A_VFB);
-    vfb=(VCC_REF/1023.0)*fb_v;
-
-    //
-    // security trigger on over voltage
-    if (vfb>O_V){
-#ifdef CONFIG_WITH_PRINT      
-      Serial.print("OVER V: ");Serial.print(vfb,2);
-      Serial.print(" I: ");Serial.println(ifb,2);
-#endif      
-      pwm=1;
-      analogWrite(P_PWM, (int)(pwm) ); 
-      digitalWrite(P_SW, LOW);
-      delay(TIMER_WAIT);
-      continue;      
-    }
-
-    //
-    // read current feedback and normalize it 
-    fb_i=analogRead(A_IFB);
-    ifb=(VCC_REF/1023.0)*fb_i;
-    
-    //
-    // security trigger on over current
-    if (ifb>O_I){
-#ifdef CONFIG_WITH_PRINT      
-      Serial.print("OVER I: ");Serial.print(ifb,2);
-      Serial.print(" V: ");Serial.println(vfb,2);
-#endif      
-      pwm=1;
-      analogWrite(P_PWM, (int)(pwm) ); 
-      digitalWrite(P_SW, LOW);
-      delay(TIMER_WAIT);
-      continue;      
-    }
-    
-    //
-    // check if cherging is done
-    //if (vfb>=42.0 && ifb<=){
-    //}
-    
-    //
-    // limit on voltage or current (or power UxI)
-    fb=max((fb_i*norm_i),fb_v);
-    //fb=fb_v;
-    
-    
-    pid_vfb.Compute();
-    analogWrite(P_PWM, (int)(pwm) ); 
-
-
-  
-  }
+  // 2)If OK control proceeds to the Constant Current loop where the PWM signal 
+  //   on-time is adjusted up or down until the measured current matches the 
+  //   specified fast charge current. 
+  //   -> The charge LED flashes quickly during this mode.
+  //
+  // 3)When the Maximum Charge Voltage setting is reached then the 
+  //   mode switches to Constant Voltage and a new loop is entered that uses 
+  //   the same method as above to control voltage at the Maximum Charge 
+  //   Voltage point. 
+  //   -> The LED now flashes more slowly. 
+  //
+  //   This continues until 30 minutes after the charge current, which is 
+  //   decreasing with time in constant voltage mode, reaches the minimum 
+  //   (set at 50 mA per 1600 mAH of capacity). 
+  //   ->The charger then shuts off and the LED goes on steady.
+  // 
+  //
+  charger_mainloop(charger);
 }
 
 

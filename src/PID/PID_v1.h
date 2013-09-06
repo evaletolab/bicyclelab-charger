@@ -20,16 +20,21 @@ class PID
 	
     void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
 
-    bool Compute();                       // * performs the PID calculation.  it should be
+    
+    float Compute(double correction=0.0);                       // * performs the PID calculation.  it should be
                                           //   called every time loop() cycles. ON/OFF and
                                           //   calculation frequency can be set using SetMode
                                           //   SetSampleTime respectively
 
+    void reset();                                          
+
     void SetOutputLimits(double, double); //clamps the output to a specific range. 0-255 by default, but
 										  //it's likely the user will want to change this depending on
 										  //the application
-	
-
+										  
+										  
+	  void setAdaptive(double minInput, double maxOutput, double maxP);
+    double adapt(double x, double in_min, double in_max, double out_min, double out_max);
 
   //available but not commonly used functions ********************************************************
     void SetTunings(double, double,       // * While most users will set the tunings once in the 
@@ -57,6 +62,11 @@ class PID
 	double dispKp;				// * we'll hold on to the tuning parameters in user-entered 
 	double dispKi;				//   format for display purposes
 	double dispKd;				//
+	
+	double minAdapt;
+	double maxAdapt;
+	double maxP;
+	double adaptP;
     
 	double kp;                  // * (P)roportional Tuning Parameter
     double ki;                  // * (I)ntegral Tuning Parameter

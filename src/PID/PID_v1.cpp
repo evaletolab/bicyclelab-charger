@@ -37,41 +37,80 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     lastTime = millis()-SampleTime;				
 }
  
+void PID::reset(){
+  Initialize();
+}
  
+double PID::adapt(double x, double in_min, double in_max, double out_min, double out_max)
+{
+  double temp = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  temp = (int) (4*temp + .5);
+  return (double) temp/4;
+} 
+
 /* Compute() **********************************************************************
  *     This, as they say, is where the magic happens.  this function should be called
  *   every time "void loop()" executes.  the function will decide for itself whether a new
  *   pid Output needs to be computed.  returns true when the output is computed,
  *   false when nothing has been done.
  **********************************************************************************/ 
-bool PID::Compute()
+float PID::Compute(double correction)
 {
    if(!inAuto) return false;
    unsigned long now = millis();
    unsigned long timeChange = (now - lastTime);
-   if(timeChange>=SampleTime)
-   {
+//   adaptP=adaptP*.8+PID::adapt(correction, minAdapt, maxAdapt, maxP, kp)*.2;
+//   if (correction>maxAdapt || correction==0.0){
+//    adaptP=kp;
+//   }else {
+//    adaptP=adaptP*.7+maxP*.3;
+//   }
+//    adaptP=kp;
+
+//  Serial.print(correction,1);
+//  Serial.print(" - ");Serial.print(minAdapt);
+//  Serial.print(" ");Serial.print(maxAdapt);
+//  Serial.print(" m: ");Serial.print(maxP);
+//  Serial.print(" p: ");Serial.print(kp);
+//  Serial.print(" y: ");Serial.println(adaptP);
+
+   if(timeChange>=SampleTime){
       /*Compute all the working error variables*/
-	  double input = *myInput;
+  	  double input = *myInput;
       double error = *mySetpoint - input;
+      
+      // integration value
       ITerm+= (ki * error);
-      if(ITerm > outMax) ITerm= outMax;
-      else if(ITerm < outMin) ITerm= outMin;
+      if(ITerm > outMax) 
+        ITerm= outMax;
+      else if(ITerm < outMin) 
+        ITerm= outMin;
+        
+      // derivative value
       double dInput = (input - lastInput);
  
       /*Compute PID Output*/
+      
       double output = kp * error + ITerm- kd * dInput;
       
-	  if(output > outMax) output = outMax;
-      else if(output < outMin) output = outMin;
-	  *myOutput = output;
+  	  if(output > outMax) 
+  	    output = outMax;
+      else if(output < outMin) 
+        output = outMin;
+  	  *myOutput = output;
 	  
       /*Remember some variables for next time*/
       lastInput = input;
       lastTime = now;
-	  return true;
-   }
-   else return false;
+  	  return adaptP;
+   }else 
+    return 0;
+}
+
+void PID::setAdaptive(double min, double max, double P){
+  minAdapt=min;
+  maxAdapt=max;
+  maxP=P;
 }
 
 
@@ -86,6 +125,11 @@ void PID::SetTunings(double Kp, double Ki, double Kd)
  
    dispKp = Kp; dispKi = Ki; dispKd = Kd;
    
+   minAdapt=1.0;
+   maxAdapt=1.0;
+   maxP=Kp;
+   adaptP=Kp;
+
    double SampleTimeInSec = ((double)SampleTime)/1000;  
    kp = Kp;
    ki = Ki * SampleTimeInSec;
