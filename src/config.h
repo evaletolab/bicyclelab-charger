@@ -39,7 +39,6 @@
 
 #define  V2B(V)  (V*1023.0/VCC_REF)
 
-#define TEMPERATURE_CALIBRATE 294
 
 #if defined( __AVR_ATtinyX4__ )
 
@@ -63,6 +62,7 @@
 #define         A_VFB 1
 #define         A_IFB 2
 
+#define TEMPERATURE_CALIBRATE 294
 
 // 0x22 => TEMP sensor, 0x80 1.1V reference
 # define A_TEMP 0xA2
@@ -83,6 +83,7 @@
 //                           +----+
 
 
+#define TEMPERATURE_CALIBRATE 294
 // 0x0F => TEMP sensor, 0x80 1.1V reference
 # define A_TEMP 0x8F
 //1.1V VREF

@@ -93,6 +93,7 @@ void loop(){
   if(!charger_openvoltage(charger)) 
     return;
 
+
   // Checking battery
   // ================
   // 1)The charger check if a battery is plugged, we assume that battery capacity 
@@ -111,6 +112,13 @@ void loop(){
   // as vibration, dropping and exposure to heat.
   if(!charger_checking(charger)) 
     return;
+
+#ifdef CONFIG_WITH_PRINT      
+      Serial.print("2 OK ");
+      Serial.print(" PWM: ");Serial.print(charger.pwm,2);
+      Serial.print(" I: ");Serial.print(charger.ifb*I_FACTOR,2);
+      Serial.print(" V: ");Serial.println(charger.vfb*V_FACTOR,2);
+#endif      
   
   //
   // main loop, charging (never exit function!)
@@ -136,6 +144,14 @@ void loop(){
   // 
   //
   charger_mainloop(charger);
+  
+#ifdef CONFIG_WITH_PRINT      
+      Serial.print("3 OK ");
+      Serial.print(" PWM: ");Serial.print(charger.pwm,2);
+      Serial.print(" I: ");Serial.print(charger.ifb*I_FACTOR,2);
+      Serial.print(" V: ");Serial.println(charger.vfb*V_FACTOR,2);
+#endif      
+  while(true);
 }
 
 

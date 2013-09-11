@@ -33,7 +33,7 @@ float avg_read(short p, double& digital){
 // Ku = 2.1, Tu = 50Hz, 0.02s, 
 // Kp =  Ku/2.2 =.96  , Ki = (1.2 * Kp) / Pu = .023, Kd=0
 //check docs/PID.log
-double aKp=0.85, aKi=0.00, aKd=0.000;
+double aKp=0.15, aKi=0.001, aKd=0.000;
 //double aKp=2.2, aKi=0.08, aKd=0.001;
 static PID pid;
 
@@ -42,6 +42,8 @@ static PID pid;
 int charger_init(CHARGER& charger){
   digitalWrite(P_SW, LOW);
   analogWrite(P_PWM, MIN_PWM);  
+  
+	charger.fb=charger.vfb=charger.avg_vfb=charger.dfb_v=charger.ifb=charger.dfb_i=0.0;
   
   //
   // setpoint value
@@ -57,6 +59,7 @@ int charger_init(CHARGER& charger){
 void charger_reset(CHARGER& charger, int pwm){
   charger.pwm=(double)pwm;
   analogWrite(P_PWM,pwm); 
+  delay(TIMER_TICK);
   digitalWrite(P_SW, LOW);
   pid_reset(pid);
 }
@@ -73,9 +76,12 @@ int charger_openvoltage(CHARGER& charger){
 #ifdef CONFIG_WITH_PRINT      
   Serial.println("START CALIBRATE: ");
 #endif      
-
+ 
   digitalWrite(P_SW, LOW);
   charger.temp=avr_internal_temp();
+#ifdef CONFIG_WITH_PRINT      
+    Serial.print(" TEMP: ");Serial.println(charger.temp,2);
+#endif      
 
   //
   // detect over temperature
@@ -91,7 +97,7 @@ int charger_openvoltage(CHARGER& charger){
 	while(openvoltage){
     analogWrite(P_PWM, OPEN_PWM); 
     charger.vfb=avg_read(A_VFB,charger.dfb_v);
-    charger.ifb=avg_read(A_VFB,charger.dfb_i);
+    charger.ifb=avg_read(A_IFB,charger.dfb_i);
     //
     // check off if vout <= vin 
     //    => input is unplugged?
@@ -99,12 +105,12 @@ int charger_openvoltage(CHARGER& charger){
 #ifdef CONFIG_WITH_PRINT      
       Serial.print("OFF : ");
       Serial.print(charger.vfb*V_FACTOR,2);
-      Serial.print(" PWM: ");
-      Serial.println((int)OPEN_PWM);
+      Serial.print(" I: ");
+      Serial.println(charger.ifb*I_FACTOR,2);
 #endif      
       // re init pwm
       count=0;
-      analogWrite(P_PWM, MIN_PWM); 
+      analogWrite(P_PWM, 0); 
       delay(TIMER_WAIT);
       continue;
     }
@@ -115,20 +121,19 @@ int charger_openvoltage(CHARGER& charger){
     if ((charger.ifb)>I_BATT_CHARGED){
 #ifdef CONFIG_WITH_PRINT      
       Serial.print("CURRENT ISSUE : ");
-      Serial.print(charger.vfb*V_FACTOR,2);
-      Serial.print(" PWM: ");
-      Serial.println((int)OPEN_PWM);
+      Serial.print(charger.ifb*I_FACTOR,2);
+      Serial.print(" V: ");
+      Serial.println(charger.vfb*V_FACTOR,2);
 #endif      
       // re init pwm
-      count=0;
-      analogWrite(P_PWM, MIN_PWM); 
+      analogWrite(P_PWM, 0); 
       delay(TIMER_WAIT);
-      continue;
+      return false;
     }
     
 
-    if ((charger.vfb)>V_IN*1.2 && count++>200){
-      openvoltage=true;count=0;
+    if ((charger.vfb)>V_IN*1.2 && count++>100){
+      openvoltage=false;count=0;
     }
     
   }
@@ -161,7 +166,7 @@ int charger_checking(CHARGER& charger){
   while(checking){
     //
     // switch on charger in open >VIN*1.2 
-    analogWrite(P_PWM, (int)charger.open_pwm);  
+    analogWrite(P_PWM, OPEN_PWM);  
     digitalWrite(P_SW, HIGH);
     
     //
@@ -174,8 +179,7 @@ int charger_checking(CHARGER& charger){
       Serial.print("OVER I: ");Serial.println(charger.ifb*I_FACTOR,2);
 #endif      
 
-      digitalWrite(P_SW,LOW);  
-      analogWrite(P_PWM, MIN_PWM);  
+      charger_reset(charger,MIN_PWM);
       delay(TIMER_WAIT);
       continue;
     }
@@ -189,8 +193,7 @@ int charger_checking(CHARGER& charger){
 #ifdef CONFIG_WITH_PRINT      
       Serial.print("UNDER/OVER V: ");Serial.println(charger.vfb*V_FACTOR,2);
 #endif      
-      digitalWrite(P_SW,LOW);  
-      analogWrite(P_PWM, MIN_PWM);  
+      charger_reset(charger,MIN_PWM);
       delay(TIMER_WAIT);
       continue;
     }
@@ -207,6 +210,8 @@ int charger_checking(CHARGER& charger){
       delay(TIMER_WAIT);
       continue;
     }
+    charger.avg_vfb=charger.vfb;
+    charger.pwm=OPEN_PWM;
     checking=false;
   }     
   return true;
@@ -236,24 +241,39 @@ int charger_checking(CHARGER& charger){
 // 
 //
 int charger_mainloop(CHARGER& charger){
-  int charging=1;
+  long charging=1, count=0, constant_voltage=false;
+  double p_norm=P_NORM, i_norm=I_NORM;
   
   //
-  // starting measurment with PWM=charger.open_pwm
-  while(charging++){
+  // one loop is about (on arduino 16Mhz)
+  // - 920us, 1087Hz (1x avg_read(3 iter) without Serial.print)
+  // - 1.8ms, 555Hz (2x avg_read without Serial.print=
+  // - 3.3ms, 306Hz (only with Serial.print)
+  while(charging){
     digitalWrite(P_SW,HIGH);  
 
     // only peak temp every (1.8 - 5.0 ms *1000 => ~2-5 seconds )
-    if(charging%1000==0){
-  	  charger.temp=avr_internal_temp();
+    if((charging++)%400==0){
+  	  //charger.temp=avr_internal_temp();
   	  charging=1;
+      Serial.print("INFO V: ");Serial.print(charger.vfb*V_FACTOR,2);
+      Serial.print(" PWM: ");Serial.print((int)(charger.pwm));
+      //Serial.print(" SP: ");Serial.print(A2D(V_BATT));
+      Serial.print(" SP: ");Serial.print(A2D(P_MAX));
+      Serial.print(" FB: ");Serial.print((int)(charger.fb));
+      Serial.print(" ERROR: ");Serial.print((int)(pid.e));
+      Serial.print("      P: ");Serial.println(charger.ifb*I_FACTOR*charger.vfb*V_FACTOR,2);
+
   	}
     
     
     //
     // read voltage feedback
     charger.vfb=avg_read(A_VFB,charger.dfb_v);
+    charger.avg_vfb=charger.avg_vfb*.9+charger.vfb*.1;
+    charger.ifb=avg_read(A_IFB,charger.dfb_i);
 
+#if 1
 
 
     //
@@ -270,7 +290,7 @@ int charger_mainloop(CHARGER& charger){
 #ifdef CONFIG_WITH_PRINT      
     //
     // detect offline (FOR DEBUG ONLY)
-    if ((charger.vfb)<=V_IN && (charger.ifb<I_BATT_CHARGED)){
+    if ((charger.vfb)<=V_IN && (charger.ifb<I_BATT_CHARGED) && count++>300){
       Serial.print("OFF : ");
       Serial.print(charger.vfb*V_FACTOR,2);
       Serial.print(" PWM: ");
@@ -282,18 +302,17 @@ int charger_mainloop(CHARGER& charger){
     }    
 #endif      
 
-#if 1
     
     //
     // security trigger on over voltage
     if (charger.vfb>O_V){
 #ifdef CONFIG_WITH_PRINT      
       Serial.print("OVER V: ");Serial.print(charger.vfb*V_FACTOR,2);
-      Serial.print("PWM: ");Serial.print((int)(charger.pwm));
+      Serial.print(" PWM: ");Serial.print((int)(charger.pwm));
       Serial.print(" I: ");Serial.println(charger.ifb*I_FACTOR,2);
 #endif      
 
-      charger_reset(charger,(int)charger.open_pwm);
+      charger_reset(charger,MIN_PWM);
       delay(TIMER_WAIT*3);
       continue;      
     }
@@ -301,13 +320,13 @@ int charger_mainloop(CHARGER& charger){
     
     //
     // security trigger on over current
-    if ((charger.ifb*charger.vfb)>(P_MAX*1.2)){
+    if ((charger.ifb*charger.vfb)>(P_MAX*1.1)){
 #ifdef CONFIG_WITH_PRINT      
       Serial.print("OVER P: ");Serial.print(charger.ifb*I_FACTOR*charger.vfb*V_FACTOR,2);
-      Serial.print("PWM: ");Serial.print((int)(charger.pwm));
+      Serial.print(" PWM: ");Serial.print((int)(charger.pwm));
       Serial.print(" V: ");Serial.println(charger.vfb*V_FACTOR,2);
 #endif      
-      charger_reset(charger,(int)charger.open_pwm);
+      charger_reset(charger,MIN_PWM);
       delay(TIMER_WAIT*3);
       continue;      
     }
@@ -329,12 +348,19 @@ int charger_mainloop(CHARGER& charger){
     
     //
     // limit on voltage for constant voltage
-    // -> or on power for fast charge
-    // -> p=(v*v_factor)*(i*i_factor)
-    double pfb_norm=charger.ifb*charger.vfb*P_NORM;
-    charger.fb=max(A2D(pfb_norm),charger.dfb_v);
-    //charger.fb=charger.fb_v;
-    charger.pwm=pid_update(pid,charger.sp,charger.fb);
+    if ((V_BATT-charger.avg_vfb)<=0.05 || constant_voltage){
+#ifdef CONFIG_WITH_PRINT      
+      Serial.print("CONSTANT VOLTAGE ");
+      Serial.println(charger.avg_vfb*V_FACTOR,2);
+#endif    
+      //constant_voltage=true;
+      charger.pwm=pid_update(pid,charger.sp,charger.dfb_v);
+    }else{
+      //
+      // limit on power for fast charge
+      charger.fb=A2D(charger.ifb*charger.vfb);//charger.dfb_v;
+      charger.pwm=pid_update(pid,A2D(P_MAX),charger.fb);
+    }
     analogWrite(P_PWM, (int)(charger.pwm) ); 
   }
   return true;

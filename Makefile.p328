@@ -14,13 +14,14 @@ DUDE = -carduino -P$(PORT) -b$(UPLOAD_RATE) -DF
 LIBRARIES = arduino.a
 
 # define *main* or *test* programm
+#OUTPUT = test-load
 OUTPUT = main
 
 
 # Customise project sources/objects/includes here  
-SRC = src/energy.cpp  src/PID/PID_v1.cpp src/$(OUTPUT).cpp
-OBJECTS =   src/energy.o src/PID/PID_v1.o src/$(OUTPUT).o
-INCLUDES = -I"/usr/lib/avr/include/avr" -I"./include" -I"src"  -I"lib/arduino" -I"src/PID"
+SRC = src/energy.cpp  src/charger.cpp src/pid.cpp src/$(OUTPUT).cpp
+OBJECTS =   src/energy.o src/charger.o src/pid.o src/$(OUTPUT).o
+INCLUDES = -I"/usr/lib/avr/include/avr" -I"./include" -I"src"  -I"lib/arduino" 
 
 #
 DEFINES = -DF_CPU=$(F_CPU)L -DARDUINO=100  -DDEBUG_SERIAL

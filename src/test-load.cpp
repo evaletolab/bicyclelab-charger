@@ -115,7 +115,7 @@ double  fb_i,  ifb, vfb, fb_v;
   analogWrite(P_PWM, (int)110 ); 
 
   //
-  // one loop is about (arduino 16Mhz)
+  // one loop is about (on arduino 16Mhz)
   // - 920us, 1087Hz (1x avg_read without Serial.print)
   // - 1.8ms, 555Hz (2x avg_read without Serial.print=
   // - 3.3ms, 306Hz (only with Serial.print)

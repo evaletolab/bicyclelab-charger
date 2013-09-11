@@ -13,8 +13,13 @@
 // --> 42.0/11.0=3.818, 
 // -->  3A/0.84=3.57
 // --> .3A/0.84=0.357
+// --> 80W/(0.84*11.0)=8.66
+// --> 70W/(0.84*11.0)=7.58
+// --> 60W/(0.84*11.0)=6.49
 // --> 50W/(0.84*11.0)=5.41
 // --> 45W/(0.84*11.0)=4.87
+// --> 40W/(0.84*11.0)=4.33
+// --> 35W/(0.84*11.0)=3.78
 // --> 30W/(0.84*11.0)=3.25
 // --> 25W/(0.84*11.0)=2.71
 // --> 20W/(0.84*11.0)=2.16
@@ -44,7 +49,7 @@
 
 # define         MAX_PWM 120
 # define         MIN_PWM 0
-# define         OPEN_PWM 8
+# define         OPEN_PWM 13
 # define         OPEN_MAX_PWM 27
 #endif
 
@@ -54,16 +59,18 @@
 # define         U_V 1.0
 # define         V_IN 1.72
 
-// P_MAX 45W
-# define         P_MAX 4.87
+// P_MAX 70W / 45W / 40W
+# define         P_MAX 7.58
+//# define         P_MAX 4.87
+//# define         P_MAX 4.33
 // I 3A
 # define         O_I 3.57
 // I 0.03A
 # define         I_BATT_CHARGED 0.0357
 
-# define         MAX_PWM 120
+# define         MAX_PWM 150
 # define         MIN_PWM 0
-# define         OPEN_PWM 8
+# define         OPEN_PWM 13
 # define         OPEN_MAX_PWM 27
 #endif
 
@@ -99,17 +106,19 @@ extern "C"{
 
 typedef struct{
 	double vfb;   //voltage feedback
+	double avg_vfb;
 	double dfb_v; // digital value
 	
 	double ifb;   //current feedback
+	double avg_ifb;
 	double dfb_i; // digital value
 
 	double fb;    //pid setpoint  (feedback)
 	double pwm;   //pid process value (boost pwm)
 	double open_pwm; //open voltage boost pwm
-	double sp;    // the pid expected value 
 	
 	double temp;
+	double sp;    // the pid expected value 
 	
 } CHARGER;
 
