@@ -64,6 +64,22 @@ void charger_reset(CHARGER& charger, int pwm){
   pid_reset(pid);
 }
 
+void charger_check_mosfet(CHARGER& charger){
+    //
+    // security trigger on over voltage
+    if (charger.vfb>0.05 && charger.vfb<=(V_IN*1.2) && charger.pwm>(OPEN_PWM)){
+#ifdef CONFIG_WITH_PRINT      
+      Serial.print("BUG, UNPLUG THE POWERLINE!!!! : ");
+      Serial.print(charger.vfb*V_FACTOR,2);
+      Serial.print(" I: ");Serial.print(charger.ifb*I_FACTOR,2);
+      Serial.print(" PWM: ");
+      Serial.println((int)charger.pwm);
+#endif      
+
+      charger_reset(charger,0);
+      while(true);
+    }
+}
 
 //
 // checking when output is switched off
@@ -94,10 +110,17 @@ int charger_openvoltage(CHARGER& charger){
     return false;      
   }
 
+
 	while(openvoltage){
+	  charger.pwm=OPEN_PWM;
     analogWrite(P_PWM, OPEN_PWM); 
     charger.vfb=avg_read(A_VFB,charger.dfb_v);
     charger.ifb=avg_read(A_IFB,charger.dfb_i);
+
+    //
+    // check mosfet
+    charger_check_mosfet(charger);
+
     //
     // check off if vout <= vin 
     //    => input is unplugged?
@@ -287,6 +310,12 @@ int charger_mainloop(CHARGER& charger){
       continue;      
     }
 
+
+    //
+    // check mosfet
+    charger_check_mosfet(charger);
+
+
 #ifdef CONFIG_WITH_PRINT      
     //
     // detect offline (FOR DEBUG ONLY)
@@ -363,6 +392,7 @@ int charger_mainloop(CHARGER& charger){
     }
     analogWrite(P_PWM, (int)(charger.pwm) ); 
   }
+  charger_reset(charger,MIN_PWM);
   return true;
 }
 

@@ -14,8 +14,8 @@ DUDE = -carduino -P$(PORT) -b$(UPLOAD_RATE) -DF
 LIBRARIES = arduino.a
 
 # define *main* or *test* programm
-#OUTPUT = test-load
-OUTPUT = main
+OUTPUT = test-load
+#OUTPUT = main
 
 
 # Customise project sources/objects/includes here  

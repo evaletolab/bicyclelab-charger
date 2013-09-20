@@ -144,6 +144,12 @@ int     charger_init          (CHARGER& charger);
 void    charger_reset         (CHARGER& charger, int pwm);
 
 
+//
+//
+// verify mosfet
+// if PWM >OPEN_PWM && vout<V_IN && vout >0 => BUG => reset(0)
+// TODO the best way todo that is to measure a 0.01Ohm on the mosfet drain
+void    charger_check_mosfet  (CHARGER& charger);
 
 //
 //

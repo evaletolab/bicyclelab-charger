@@ -112,7 +112,7 @@ double  fb_i,  ifb, vfb, fb_v;
   // don't load directly, preload with a low pwm
   analogWrite(P_PWM, (int)10 );
   delay(TIMER_WAIT*10);   
-  analogWrite(P_PWM, (int)110 ); 
+  analogWrite(P_PWM, (int)20 ); 
 
   //
   // one loop is about (on arduino 16Mhz)

@@ -84,7 +84,7 @@ void setup()   {
 
 }
 
-void loop(){		   
+void loop(){	
   //
   //
   // checking when output is switched off
