@@ -10,6 +10,7 @@ This is an opensource lithium-ion battery charger that use laptop power adapter 
 4. 1 LED indicator for charging status
 5. BMS features; Balancing charge on each cell
 6. custom number of serial cells 5..12
+7. small size, only 30x90x8mm
 
 ![The PCB board](https://raw.github.com/evaletolab/bicyclelab-charger/master/hardware/bicyclelab-charger-v4.2.png "charger v4.2")
 
