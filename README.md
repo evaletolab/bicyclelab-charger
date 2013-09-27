@@ -4,7 +4,7 @@ This is an opensource lithium-ion battery charger that use laptop power adapter 
 
 ##Features
 
-1. boost input from 18.5V - 20V 6A to 42V (or 47.2V) with 95% of 85W input
+1. boost input from 18.5V - 4.7A to 42V (or 47.2V) with ~95% of 85W 
 2. stage charging; current control then voltage control
 3. full protections: Short circuit / Overload / Over voltage / Over temperature
 4. 1 LED indicator for charging status
