@@ -14,7 +14,7 @@ This is an opensource lithium-ion battery charger that use laptop power adapter 
 
 ![The PCB board](https://raw.github.com/evaletolab/bicyclelab-charger/master/hardware/bicyclelab-charger-v4.2.png "charger v4.2")
 
-##Power stage for battery charge
+##Power stage (battery charge)
 
 This if the fourth prototype release for the power board. The purpose of this board is to manage the output 
 of a (5..12)serial lithium-ion battery charge with an input given by a laptop ac adapter (currently the apple magsafe1 85W). 
