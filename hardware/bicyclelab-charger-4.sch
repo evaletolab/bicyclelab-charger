@@ -1063,6 +1063,43 @@ Metric Code Size 5650</description>
 <rectangle x1="1.905" y1="-3.302" x2="2.667" y2="-1.778" layer="51"/>
 <rectangle x1="-0.381" y1="-3.302" x2="0.381" y2="-1.778" layer="51"/>
 </package>
+<package name="SMA-DIODE">
+<description>&lt;B&gt;Diode&lt;/B&gt;&lt;p&gt;
+Basic SMA packaged diode. Good for reverse polarization protection. Common part #: MBRA140</description>
+<wire x1="-2.3" y1="1" x2="-2.3" y2="1.45" width="0.2032" layer="21"/>
+<wire x1="-2.3" y1="1.45" x2="2.3" y2="1.45" width="0.2032" layer="21"/>
+<wire x1="2.3" y1="1.45" x2="2.3" y2="1" width="0.2032" layer="21"/>
+<wire x1="2.3" y1="-1" x2="2.3" y2="-1.45" width="0.2032" layer="21"/>
+<wire x1="2.3" y1="-1.45" x2="-2.3" y2="-1.45" width="0.2032" layer="21"/>
+<wire x1="-2.3" y1="-1.45" x2="-2.3" y2="-1" width="0.2032" layer="21"/>
+<wire x1="1" y1="1" x2="1" y2="-1" width="0.2032" layer="21"/>
+<smd name="A" x="-2.15" y="0" dx="1.27" dy="1.47" layer="1" rot="R180"/>
+<smd name="C" x="2.15" y="0" dx="1.27" dy="1.47" layer="1"/>
+<text x="-2.286" y="1.651" size="0.4064" layer="25">&gt;NAME</text>
+<text x="0.254" y="1.651" size="0.4064" layer="27">&gt;VALUE</text>
+</package>
+<package name="SOD-323">
+<wire x1="-0.9" y1="0.65" x2="-0.5" y2="0.65" width="0.2032" layer="21"/>
+<wire x1="-0.5" y1="0.65" x2="0.9" y2="0.65" width="0.2032" layer="21"/>
+<wire x1="-0.9" y1="-0.65" x2="-0.5" y2="-0.65" width="0.2032" layer="21"/>
+<wire x1="-0.5" y1="-0.65" x2="0.9" y2="-0.65" width="0.2032" layer="21"/>
+<wire x1="-0.5" y1="0.65" x2="-0.5" y2="-0.65" width="0.2032" layer="21"/>
+<smd name="1" x="-1.15" y="0" dx="0.63" dy="0.83" layer="1"/>
+<smd name="2" x="1.15" y="0" dx="0.63" dy="0.83" layer="1"/>
+<text x="-0.889" y="1.016" size="0.4064" layer="25">&gt;NAME</text>
+<text x="-1.016" y="-1.397" size="0.4064" layer="27">&gt;VALUE</text>
+</package>
+<package name="SOD-128">
+<wire x1="-0.9" y1="1.15" x2="-0.5" y2="1.15" width="0.2032" layer="21"/>
+<wire x1="-0.5" y1="1.15" x2="2.9" y2="1.15" width="0.2032" layer="21"/>
+<wire x1="-0.9" y1="-1.65" x2="-0.5" y2="-1.65" width="0.2032" layer="21"/>
+<wire x1="-0.5" y1="-1.65" x2="2.9" y2="-1.65" width="0.2032" layer="21"/>
+<wire x1="-0.5" y1="1.15" x2="-0.5" y2="-1.65" width="0.2032" layer="21"/>
+<smd name="1" x="-0.65" y="-0.25" dx="1.5" dy="2" layer="1"/>
+<smd name="2" x="2.65" y="-0.25" dx="1.5" dy="2" layer="1"/>
+<text x="-0.889" y="1.516" size="0.4064" layer="25">&gt;NAME</text>
+<text x="-1.016" y="-2.397" size="0.4064" layer="27">&gt;VALUE</text>
+</package>
 </packages>
 <symbols>
 <symbol name="AUIPS7125R">
@@ -1105,6 +1142,19 @@ Metric Code Size 5650</description>
 <pin name="VIN" x="-12.7" y="0" length="middle" direction="in"/>
 <pin name="VOUT" x="12.7" y="0" length="middle" direction="out" rot="R180"/>
 <pin name="GND" x="0" y="-12.7" length="middle" direction="pwr" rot="R90"/>
+</symbol>
+<symbol name="DIODE-SCHOTTKY">
+<wire x1="-1.27" y1="-1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
+<wire x1="1.27" y1="0" x2="-1.27" y2="1.27" width="0.254" layer="94"/>
+<wire x1="1.27" y1="1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="1.27" x2="-1.27" y2="-1.27" width="0.254" layer="94"/>
+<wire x1="1.27" y1="0" x2="1.27" y2="-1.27" width="0.254" layer="94"/>
+<wire x1="1.27" y1="1.27" x2="1.778" y2="1.524" width="0.254" layer="94"/>
+<wire x1="1.27" y1="-1.27" x2="0.762" y2="-1.524" width="0.254" layer="94"/>
+<text x="2.54" y="0.4826" size="1.778" layer="95">&gt;NAME</text>
+<text x="2.54" y="-2.3114" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="A" x="-2.54" y="0" visible="off" length="short" direction="pas"/>
+<pin name="C" x="2.54" y="0" visible="off" length="short" direction="pas" rot="R180"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -1299,6 +1349,42 @@ Standard 0603 ceramic capacitor, and 0.1" leaded capacitor.</description>
 <attribute name="MODEL1" value="uA78M00" constant="no"/>
 <attribute name="MODEL2" value="SPX2945M3" constant="no"/>
 </technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="DIODE-SCHOTTKY" prefix="D">
+<description>ZLLS410
+10V LOW LEAKAGE SCHOTTKY DIODE IN SOD323</description>
+<gates>
+<gate name="G$1" symbol="DIODE-SCHOTTKY" x="0" y="0"/>
+</gates>
+<devices>
+<device name="_" package="SMA-DIODE">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="C"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="SOD323" package="SOD-323">
+<connects>
+<connect gate="G$1" pin="A" pad="2"/>
+<connect gate="G$1" pin="C" pad="1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="SOD128" package="SOD-128">
+<connects>
+<connect gate="G$1" pin="A" pad="2"/>
+<connect gate="G$1" pin="C" pad="1"/>
+</connects>
+<technologies>
+<technology name=""/>
 </technologies>
 </device>
 </devices>
@@ -7912,7 +7998,7 @@ Based on the following sources:&lt;p&gt;
 <part name="MISO" library="SparkFun" deviceset="M01" device="SMDNS" value=""/>
 <part name="U$8" library="bicyclelab" deviceset="AUIPS7125R" device=""/>
 <part name="VCC5" library="SparkFun" deviceset="M01" device="PTH" value=""/>
-<part name="R5" library="SparkFun" deviceset="RESISTOR" device="" value="5k6"/>
+<part name="R5" library="SparkFun" deviceset="RESISTOR" device="" value="10k"/>
 <part name="SCK" library="SparkFun" deviceset="M01" device="SMDNS" value=""/>
 <part name="MOSI" library="SparkFun" deviceset="M01" device="SMDNS" value=""/>
 <part name="GND30" library="SparkFun" deviceset="GND" device=""/>
@@ -7968,6 +8054,7 @@ Based on the following sources:&lt;p&gt;
 <part name="C16" library="adafruit" deviceset="CPOL-US" device="D" value="100uF"/>
 <part name="R8" library="SparkFun" deviceset="RESISTOR" device="" value="10k"/>
 <part name="GND10" library="SparkFun" deviceset="GND" device=""/>
+<part name="D4" library="bicyclelab" deviceset="DIODE-SCHOTTKY" device="SOD128"/>
 </parts>
 <sheets>
 <sheet>
@@ -8045,6 +8132,7 @@ Based on the following sources:&lt;p&gt;
 <instance part="C16" gate="G$1" x="147.32" y="106.68"/>
 <instance part="R8" gate="G$1" x="165.1" y="60.96" rot="R270"/>
 <instance part="GND10" gate="1" x="165.1" y="50.8"/>
+<instance part="D4" gate="G$1" x="213.36" y="119.38"/>
 </instances>
 <busses>
 </busses>
@@ -8364,8 +8452,8 @@ Based on the following sources:&lt;p&gt;
 <segment>
 <pinref part="U$8" gate="G$1" pin="OUT"/>
 <wire x1="203.2" y1="116.84" x2="203.2" y2="119.38" width="0.1524" layer="91"/>
-<wire x1="203.2" y1="119.38" x2="223.52" y2="119.38" width="0.1524" layer="91"/>
-<pinref part="VOUT" gate="G$1" pin="1"/>
+<pinref part="D4" gate="G$1" pin="A"/>
+<wire x1="203.2" y1="119.38" x2="210.82" y2="119.38" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$9" class="0">
@@ -8468,6 +8556,13 @@ Based on the following sources:&lt;p&gt;
 <pinref part="R7" gate="G$1" pin="1"/>
 <pinref part="Q2" gate="G$1" pin="G"/>
 <wire x1="68.58" y1="99.06" x2="71.12" y2="99.06" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$8" class="0">
+<segment>
+<pinref part="D4" gate="G$1" pin="C"/>
+<wire x1="215.9" y1="119.38" x2="223.52" y2="119.38" width="0.1524" layer="91"/>
+<pinref part="VOUT" gate="G$1" pin="1"/>
 </segment>
 </net>
 </nets>

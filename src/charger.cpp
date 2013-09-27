@@ -67,7 +67,7 @@ void charger_reset(CHARGER& charger, int pwm){
 void charger_check_mosfet(CHARGER& charger){
     //
     // security trigger on over voltage
-    if (charger.vfb>0.05 && charger.vfb<=(V_IN*1.2) && charger.pwm>(OPEN_PWM)){
+    if (charger.vfb>0.05 && charger.vfb<=(V_IN) && charger.pwm>(OPEN_PWM)){
 #ifdef CONFIG_WITH_PRINT      
       Serial.print("BUG, UNPLUG THE POWERLINE!!!! : ");
       Serial.print(charger.vfb*V_FACTOR,2);
@@ -143,7 +143,7 @@ int charger_openvoltage(CHARGER& charger){
     //    => input is short circuit?
     if ((charger.ifb)>I_BATT_CHARGED){
 #ifdef CONFIG_WITH_PRINT      
-      Serial.print("CURRENT ISSUE : ");
+      Serial.print("CURRENT ISSUE I: ");
       Serial.print(charger.ifb*I_FACTOR,2);
       Serial.print(" V: ");
       Serial.println(charger.vfb*V_FACTOR,2);
@@ -279,10 +279,11 @@ int charger_mainloop(CHARGER& charger){
     if((charging++)%400==0){
   	  //charger.temp=avr_internal_temp();
   	  charging=1;
+      if (constant_voltage)Serial.print("CST ");
       Serial.print("INFO V: ");Serial.print(charger.vfb*V_FACTOR,2);
       Serial.print(" PWM: ");Serial.print((int)(charger.pwm));
       //Serial.print(" SP: ");Serial.print(A2D(V_BATT));
-      Serial.print(" SP: ");Serial.print(A2D(P_MAX));
+      Serial.print(" TEMP: ");Serial.print(charger.temp);
       Serial.print(" FB: ");Serial.print((int)(charger.fb));
       Serial.print(" ERROR: ");Serial.print((int)(pid.e));
       Serial.print("      P: ");Serial.println(charger.ifb*I_FACTOR*charger.vfb*V_FACTOR,2);
@@ -377,12 +378,8 @@ int charger_mainloop(CHARGER& charger){
     
     //
     // limit on voltage for constant voltage
-    if ((V_BATT-charger.avg_vfb)<=0.05 || constant_voltage){
-#ifdef CONFIG_WITH_PRINT      
-      Serial.print("CONSTANT VOLTAGE ");
-      Serial.println(charger.avg_vfb*V_FACTOR,2);
-#endif    
-      //constant_voltage=true;
+    if ((V_BATT-charger.avg_vfb)<=0.01 || constant_voltage){
+      constant_voltage=true;
       charger.pwm=pid_update(pid,charger.sp,charger.dfb_v);
     }else{
       //

@@ -11,10 +11,13 @@
 //
 // --> 48.0/11.0=4.36, 
 // --> 42.0/11.0=3.818, 
+// --> 43.0/11.0=3.909, 
 // -->  3A/0.84=3.57
 // --> .3A/0.84=0.357
 // --> 80W/(0.84*11.0)=8.66
+// --> 75W/(0.84*11.0)=7.74
 // --> 70W/(0.84*11.0)=7.58
+// --> 65W/(0.84*11.0)=7.03
 // --> 60W/(0.84*11.0)=6.49
 // --> 50W/(0.84*11.0)=5.41
 // --> 45W/(0.84*11.0)=4.87
@@ -54,21 +57,23 @@
 #endif
 
 #ifdef MODE_420V
-# define         V_BATT 3.818
+# define         V_BATT 3.909
 # define         O_V 4.3636
 # define         U_V 1.0
 # define         V_IN 1.72
 
-// P_MAX 70W / 45W / 40W
+// P_MAX 75W /70W /65W / 45W / 40W
+//# define         P_MAX 7.74
 # define         P_MAX 7.58
+//# define         P_MAX 7.03
 //# define         P_MAX 4.87
 //# define         P_MAX 4.33
 // I 3A
 # define         O_I 3.57
 // I 0.03A
-# define         I_BATT_CHARGED 0.0357
+# define         I_BATT_CHARGED 0.0457
 
-# define         MAX_PWM 150
+# define         MAX_PWM 153
 # define         MIN_PWM 0
 # define         OPEN_PWM 13
 # define         OPEN_MAX_PWM 27

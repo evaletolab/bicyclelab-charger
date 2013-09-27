@@ -92,8 +92,6 @@ void loop(){
   
   
 
-//Specify values for current. Current is normalized with V_BATT
-double  fb_i,  ifb, vfb, fb_v;
   
   //
   //
@@ -108,30 +106,44 @@ double  fb_i,  ifb, vfb, fb_v;
   //digitalWrite(2, LOW);
   //short odd=LOW;
 
+//  if(!charger_openvoltage(charger)) 
+//    return;
+
+#ifdef CONFIG_WITH_PRINT      
+  Serial.println("START: ");
+#endif      
+
+  charger.pwm=OPEN_PWM*6;
+  analogWrite(P_PWM, (int)charger.pwm ); 
+  charger_check_mosfet(charger);
+//  delay(TIMER_WAIT*10);   
   digitalWrite(P_SW, HIGH);
-  // don't load directly, preload with a low pwm
-  analogWrite(P_PWM, (int)10 );
-  delay(TIMER_WAIT*10);   
-  analogWrite(P_PWM, (int)20 ); 
+//  while(true){
+//    charger_check_mosfet(charger);
+//  }
+//  delay(TIMER_WAIT*10);   
 
   //
   // one loop is about (on arduino 16Mhz)
   // - 920us, 1087Hz (1x avg_read without Serial.print)
   // - 1.8ms, 555Hz (2x avg_read without Serial.print=
   // - 3.3ms, 306Hz (only with Serial.print)
-  
-  while(true){
+  int lp=1;
+  while(lp++>0){
 // Helper to measure loop time
 //    digitalWrite(2,odd?HIGH:LOW);
 //    odd=!odd;
-  
-    ifb=avg_read(A_IFB,fb_i);
-    vfb=avg_read(A_VFB,fb_v);
+    //charger_check_mosfet(charger);
+    if(lp%200==0)  {
+    lp=1;
+    charger.ifb=avg_read(A_IFB,charger.dfb_i);
+    charger.vfb=avg_read(A_VFB,charger.dfb_v);
 //    Serial.print(open_pwm,2);
-    Serial.print(" : ");
-    Serial.print(vfb*V_FACTOR,2);
-    Serial.print(" : ");
-    Serial.println(ifb*I_FACTOR,3);
+    Serial.print(" V ");
+    Serial.print(charger.vfb*V_FACTOR,2);
+    Serial.print(" I ");
+    Serial.println(charger.ifb*I_FACTOR,3);
+    }
   }
 #endif      
   
