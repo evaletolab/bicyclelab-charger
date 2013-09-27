@@ -11,7 +11,7 @@ This is a lithium-ion battery charger that use laptop power adapter as input.
 5. BMS features; Balancing charge on each cell
 6. custom number of serial cells 5..12
 
-##Power stage
+##Power stage for battery charge
 
 This if the fourth prototype release for the power board. The purpose of this board is to manage the output 
 of a (5..12)serial lithium-ion battery charge with an input given by a laptop ac adapter (currently the apple magsafe1 85W). 
@@ -19,11 +19,11 @@ The software is mainly a PID control based on the MAX_POWER for the fast charge 
 the constant charge. The size of the board is about 30x90mm
 
 
-##Battery protection, cell balancing
+##Cell balancing and protection
 This project is targeted for each individual cell. The purpose of this project is to make a simple cascading 
 module to manage over/under voltage/temperatur for each cell. The first prototype is still not available for testing. 
 
-1. passive balancing for the cell overvoltage
+1. an overvoltage measurement is triggering a passive balancing for the cell
 2. TODO - implement an isolated one wire communication to broadcast,
   * undervoltage signal
   * over temperature signal
