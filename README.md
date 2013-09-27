@@ -1,6 +1,6 @@
 #85-110W single output battery charger
 
-This is a lithium-ion battery charger that use laptop power adapter as input.
+This is an opensource lithium-ion battery charger that use laptop power adapter as input.
 
 ##Features
 
