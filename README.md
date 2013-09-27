@@ -20,8 +20,8 @@ the constant charge. The size of the board is about 30x90mm
 
 
 ##Battery protection, cell balancing
-The first prototype is still not available for testing. The purpose of this project is to make a simple cascading 
-module to manage over/under voltage/temperatur for each cell. 
+This project is targeted for each individual cell. The purpose of this project is to make a simple cascading 
+module to manage over/under voltage/temperatur for each cell. The first prototype is still not available for testing. 
 
 1. passive balancing for the cell overvoltage
 2. TODO - implement an isolated one wire communication to broadcast,
