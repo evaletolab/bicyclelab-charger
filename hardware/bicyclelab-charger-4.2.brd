@@ -118,7 +118,7 @@
 <plain>
 <wire x1="4.445" y1="-0.3175" x2="91.745" y2="-0.3175" width="0" layer="20"/>
 <wire x1="91.745" y1="27.6125" x2="4.7625" y2="27.6125" width="0" layer="20"/>
-<text x="53.975" y="-12.3825" size="1.778" layer="27">O.Evalet - Version 0.1</text>
+<text x="53.975" y="-12.3825" size="1.778" layer="27">O.Evalet - Version 4.2</text>
 <text x="47.3075" y="22.86" size="0.762" layer="21">FET</text>
 <text x="23.8125" y="1.27" size="0.762" layer="21" rot="R180">SWITCH</text>
 <text x="7.3025" y="8.255" size="0.762" layer="21">!RST</text>
@@ -126,7 +126,7 @@
 <text x="7.3025" y="5.715" size="0.762" layer="21">SCK</text>
 <text x="7.3025" y="0.635" size="0.762" layer="21">GND</text>
 <text x="7.3025" y="3.175" size="0.762" layer="21">MISO</text>
-<text x="67.945" y="1.5875" size="1.016" layer="22" rot="MR180">evaletolab - battery charger - 4.1</text>
+<text x="67.945" y="1.5875" size="1.016" layer="22" rot="MR180">evaletolab - battery charger - 4.2</text>
 <text x="40.3225" y="1.905" size="0.762" layer="22" rot="MR0"> -</text>
 <text x="22.225" y="10.16" size="0.762" layer="21">VFB</text>
 <text x="21.9075" y="4.7625" size="0.762" layer="21">IFB</text>
