@@ -16,8 +16,8 @@ This is an opensource lithium-ion battery charger that use laptop power adapter 
 
 ##Power stage (battery charge)
 
-This if the fourth prototype release for the power board. The purpose of this board is to manage the output 
-of a (5..12)serial lithium-ion battery charge with an input given by a laptop ac adapter (currently the apple magsafe1 85W). 
+This if the fourth prototype release. The purpose of this board is to manage the charge  
+of a 10/11 serial lithium-ion cell with an input given by a laptop ac adapter (currently the apple magsafe1 85W). 
 The software is mainly a PID control based on the MAX_POWER for the fast charge and the BATTERY_VOLTAGE for 
 the constant charge. The size of the board is about 30x90mm
 
