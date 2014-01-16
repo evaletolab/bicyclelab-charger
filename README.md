@@ -2,6 +2,8 @@
 
 This is an opensource lithium-ion battery charger that use laptop power adapter as input.
 
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/evaletolab/bicyclelab-charger/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
 ##Features
 
 1. boost input from 18.5V - 4.7A to 42V (or 47.2V) with ~95% of efficiency 
