@@ -16,6 +16,9 @@ This is an opensource lithium-ion battery charger that use laptop power adapter 
 
 ![The PCB board](https://raw.github.com/evaletolab/bicyclelab-charger/master/hardware/bicyclelab-charger-v4.2.png "charger v4.2")
 
+##The result
+![8S2P](https://farm8.staticflickr.com/7239/13272785655_40815b8815_z.jpg)
+
 ##Power stage (battery charge)
 
 This if the fourth prototype release. The purpose of this board is to manage the charge  
