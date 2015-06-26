@@ -10,7 +10,7 @@ This is an opensource lithium-ion battery charger that use laptop power adapter 
 2. stage charging; current control then voltage control
 3. full protections: Short circuit / Overload / Over voltage / Over temperature
 4. 1 LED indicator for charging status
-5. BMS features; Balancing charge on each cell
+5. BMS features; Balancing charge on each cell [TODO]
 6. custom number of serial cells 5..12
 7. small size, only 30x90x8mm
 
