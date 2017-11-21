@@ -1,7 +1,7 @@
 # 85-110W single output battery charger
 
 This is an opensource lithium-ion battery charger that use laptop power adapter as input.
-* Looking for details regarding [the bicycle manager](https://github.com/evaletolab/bicyclelab-manager)?
+* Further reading regarding [the bicycle manager](https://github.com/evaletolab/bicyclelab-manager)?
 
 ## Features
 
